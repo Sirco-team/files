@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IXL | Dashboard</title>
+    <link rel="icon" href="https://www.ixl.com/ixl-favicon.png">
+    <style>
+        /* Style for the full-page iframe */
+        iframe {
+            width: 100%;
+            height: 100vh;
+            border: none;
+        }
+        /* Style for the pop-up container */
+        #popup {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        /* Style for input fields and button */
+        input, button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        /* Style for the "Access granted!" message */
+        #accessMessage {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: green;
+            background-color: white;
+            padding: 20px;
+            border: 2px solid green;
+            border-radius: 10px;
+            z-index: 1000;
+        }
+    </style>
+    <script>
+        // Flag to switch between text file or inline credentials
+        const useTextFile = false; // Set to false to use embedded credentials
+
+        // Inline credentials as a fallback (name: code)
+        const inlineCredentials = {
+            "Timmy": "LS7",
+            "Camden": "LS7",
+            "Ritter": "LS69",
+            "Kafuti": "gay"
+        };
+
+        async function verifyNameAndCode() {
+            // Get the values entered by the user
+            const fullName = document.getElementById("name").value.trim();
+            const accessCode = document.getElementById("accessCode").value.trim();
+
+            if (!fullName || !accessCode) {
+                alert("Both fields are required.");
+                return;
+            }
+
+            try {
+                let credentials = {};
+
+                if (useTextFile) {
+                    // Attempt to fetch the credentials file
+                    const response = await fetch("credentials.txt");
+                    if (!response.ok) {
+                        // Handle missing or inaccessible text file
+                        throw new Error("Credentials file not found.");
+                    }
+                    const text = await response.text();
+
+                    // Parse the text file
+                    const lines = text.split("\n");
+                    lines.forEach(line => {
+                        const [name, code] = line.split(":"); // Split name and code by ":"
+                        if (name && code) {
+                            credentials[name.trim()] = code.trim();
+                        }
+                    });
+                } else {
+                    // Use inline credentials as fallback
+                    credentials = inlineCredentials;
+                }
+
+                // Verify the credentials
+                if (credentials[fullName] && credentials[fullName] === accessCode) {
+                    // Show "Access granted!" message
+                    const accessMessage = document.getElementById("accessMessage");
+                    accessMessage.style.display = "block";
+
+                    // Hide the message after 1 second and embed the iframe
+                    setTimeout(() => {
+                        accessMessage.style.display = "none";
+                        document.body.innerHTML = '<iframe src="https://e1a.neocities.org/discordforugb/discords.html"></iframe>';
+                    }, 1000);
+                } else {
+                    alert("Incorrect credentials. Access denied.");
+                }
+            } catch (error) {
+                console.error("Error verifying credentials:", error);
+                alert("Failed to verify credentials. Either the file is missing or there’s an issue.");
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- Pop-up container -->
+    <div id="popup">
+        <h1>Enter Your Credentials</h1>
+        <input type="text" id="name" placeholder="Full Name (First and Last)">
+        <input type="password" id="accessCode" placeholder="Access Code">
+        <button onclick="verifyNameAndCode()">Submit</button>
+    </div>
+
+    <!-- Access granted message -->
+    <div id="accessMessage">Access Granted!</div>
+</body>
+</html>
