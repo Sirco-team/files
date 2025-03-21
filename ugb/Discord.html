@@ -4,10 +4,12 @@
     <title>IXL | Dashboard</title>
     <link rel="icon" href="https://www.ixl.com/ixl-favicon.png">
     <style>
-        /* Style for the full-page iframe */
-        iframe {
-            width: 100%;
-            height: 100vh;
+        /* Style for the Discord embed container */
+        widgetbot {
+            width: 90%;
+            height: 600px;
+            margin: 20px auto;
+            display: block;
             border: none;
         }
         /* Style for the input container */
@@ -134,10 +136,18 @@
                     const accessMessage = document.getElementById("accessMessage");
                     accessMessage.style.display = "block";
 
-                    // Hide the message after 1 second and embed the iframe
+                    // Hide the message after 1 second and embed the WidgetBot Discord
                     setTimeout(() => {
                         accessMessage.style.display = "none";
-                        document.body.innerHTML = '<iframe src="https://cdn.jsdelivr.net/gh/Sirco-team/files/ugb/embed.html"></iframe>';
+                        document.body.innerHTML = `
+                            <widgetbot 
+                                server="1337923674128515157" 
+                                channel="1337923675151929467" 
+                                width="90%" 
+                                height="600px">
+                            </widgetbot>
+                            <script src="https://cdn.jsdelivr.net/npm/@widgetbot/html-embed"></script>
+                        `;
                     }, 1000);
                 } else {
                     // Show "Access denied!" message
