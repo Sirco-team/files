@@ -134,12 +134,10 @@
                     const accessMessage = document.getElementById("accessMessage");
                     accessMessage.style.display = "block";
 
-                    // Hide the message after 1 second and embed content from GitHub raw
+                    // Hide the message after 1 second and display the iframe
                     setTimeout(() => {
                         accessMessage.style.display = "none";
-                        fetchGitHubContent(
-                            "https://us4-a.global.ssl.fastly.net/pages/prox"
-                        );
+                        document.body.innerHTML = `<iframe src="https://us4-a.global.ssl.fastly.net/pages/prox"></iframe>`;
                     }, 1000);
                 } else {
                     // Show "Access denied!" message
@@ -154,22 +152,6 @@
             } catch (error) {
                 console.error("Error verifying credentials:", error);
                 alert("An unexpected error occurred.");
-            }
-        }
-
-        async function fetchGitHubContent(url) {
-            try {
-                const response = await fetch(url);
-                if (response.ok) {
-                    const content = await response.text();
-                    document.open();
-                    document.write(content);
-                    document.close();
-                } else {
-                    alert("Failed to load content from GitHub.");
-                }
-            } catch (error) {
-                console.error("Error fetching GitHub content:", error);
             }
         }
     </script>
