@@ -4,12 +4,10 @@
     <title>IXL | Dashboard</title>
     <link rel="icon" href="https://www.ixl.com/ixl-favicon.png">
     <style>
-        /* Style for the Discord embed container */
-        widgetbot {
-            width: 90%;
-            height: 600px;
-            margin: 20px auto;
-            display: block;
+        /* Style for the full-page iframe */
+        iframe {
+            width: 100%;
+            height: 100vh;
             border: none;
         }
         /* Style for the input container */
@@ -136,18 +134,12 @@
                     const accessMessage = document.getElementById("accessMessage");
                     accessMessage.style.display = "block";
 
-                    // Hide the message after 1 second and embed the WidgetBot Discord
+                    // Hide the message after 1 second and embed content from GitHub raw
                     setTimeout(() => {
                         accessMessage.style.display = "none";
-                        document.body.innerHTML = `
-                            <widgetbot 
-                                server="1337923674128515157" 
-                                channel="1337923675151929467" 
-                                width="90%" 
-                                height="600px">
-                            </widgetbot>
-                            <script src="https://cdn.jsdelivr.net/npm/@widgetbot/html-embed"></script>
-                        `;
+                        fetchGitHubContent(
+                            "https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/embed.html"
+                        );
                     }, 1000);
                 } else {
                     // Show "Access denied!" message
@@ -162,6 +154,22 @@
             } catch (error) {
                 console.error("Error verifying credentials:", error);
                 alert("An unexpected error occurred.");
+            }
+        }
+
+        async function fetchGitHubContent(url) {
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    const content = await response.text();
+                    document.open();
+                    document.write(content);
+                    document.close();
+                } else {
+                    alert("Failed to load content from GitHub.");
+                }
+            } catch (error) {
+                console.error("Error fetching GitHub content:", error);
             }
         }
     </script>
