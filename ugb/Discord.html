@@ -10,7 +10,7 @@
             height: 100vh;
             border: none;
         }
-        /* Style for the pop-up container */
+        /* Style for the input container */
         #popup {
             display: flex;
             flex-direction: column;
@@ -31,8 +31,8 @@
             padding: 10px;
             font-size: 16px;
         }
-        /* Style for the "Access granted!" and "Access denied!" messages */
-        #accessMessage, #errorMessage {
+        /* Style for success and error messages */
+        #accessMessage, #errorMessage, #fileErrorMessage {
             display: none;
             position: absolute;
             top: 50%;
@@ -52,6 +52,10 @@
         #errorMessage {
             color: red;
             border: 2px solid red;
+        }
+        #fileErrorMessage {
+            color: orange;
+            border: 2px solid orange;
         }
     </style>
     <script>
@@ -100,8 +104,14 @@
                     // Attempt to fetch the credentials file
                     const response = await fetch("credentials.txt");
                     if (!response.ok) {
-                        // Handle missing or inaccessible text file
-                        throw new Error("Credentials file not found.");
+                        // Show message if the file is missing
+                        const fileErrorMessage = document.getElementById("fileErrorMessage");
+                        fileErrorMessage.style.display = "block";
+
+                        setTimeout(() => {
+                            fileErrorMessage.style.display = "none";
+                        }, 2000);
+                        return;
                     }
                     const text = await response.text();
 
@@ -141,13 +151,13 @@
                 }
             } catch (error) {
                 console.error("Error verifying credentials:", error);
-                alert("Failed to verify credentials. Either the file is missing or there’s an issue.");
+                alert("An unexpected error occurred.");
             }
         }
     </script>
 </head>
 <body>
-    <!-- Pop-up container for on-site input (only displayed if usePopup is false) -->
+    <!-- Input container for on-site input (only displayed if usePopup is false) -->
     <div id="popup" style="display: none;">
         <h1>Enter Your Credentials</h1>
         <input type="text" id="name" placeholder="Full Name (First and Last)">
@@ -158,9 +168,10 @@
     <!-- Access messages -->
     <div id="accessMessage">Access Granted!</div>
     <div id="errorMessage">Access Denied!</div>
+    <div id="fileErrorMessage">Credentials File Not Found!</div>
 
     <script>
-        // Show the pop-up container if usePopup is false
+        // Show the input container if usePopup is false
         if (!usePopup) {
             document.getElementById("popup").style.display = "flex";
         }
