@@ -102,7 +102,7 @@
 
                 if (useTextFile) {
                     // Attempt to fetch the credentials file
-                    const response = await fetch("credentials.txt");
+                    const response = await fetch("https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/credentials.txt");
                     if (!response.ok) {
                         // Show message if the file is missing
                         const fileErrorMessage = document.getElementById("fileErrorMessage");
