@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>IXL | Dashboard</title>
+    <title>Dynamic Embed | Dashboard</title>
     <link rel="icon" href="https://www.ixl.com/ixl-favicon.png">
     <style>
         /* Style for the full-page iframe */
@@ -25,11 +25,16 @@
             color: white;
             font-family: Arial, sans-serif;
         }
-        /* Style for input fields and button */
-        input, button {
+        /* Style for input fields and buttons */
+        input, button, textarea {
             margin: 10px;
             padding: 10px;
             font-size: 16px;
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            font-family: monospace;
         }
         /* Style for success and error messages */
         #accessMessage, #errorMessage, #fileErrorMessage {
@@ -59,74 +64,51 @@
         }
     </style>
     <script>
-        // Toggle between popup and on-site inputs
-        const usePopup = false; // Set to true for popup, false for on-site
+        // Always fetch the latest credentials.txt
+        const credentialsUrl = "https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/credentials.txt";
 
-        // Flag to switch between text file or inline credentials
-        const useTextFile = true; // Set to false to use embedded credentials
+        // Option: Choose between "iframe", "github", or "custom"
+        const displayOption = "iframe"; // Change to "github" or "custom" as needed
 
-        // Inline credentials as a fallback (name: code)
-        const inlineCredentials = {
-            "John Doe": "password123",
-            "Jane Smith": "secure456",
-            "Alice Johnson": "pass789"
-        };
+        // Custom HTML (only used when displayOption is "custom")
+        const customHtmlContent = `
+            <h1>Welcome to Custom HTML</h1>
+            <p>This is a custom hardcoded HTML block.</p>
+        `;
 
         async function verifyNameAndCode() {
-            let fullName, accessCode;
+            const fullName = document.getElementById("name").value.trim();
+            const accessCode = document.getElementById("accessCode").value.trim();
 
-            if (usePopup) {
-                // Use browser prompts for input
-                fullName = prompt("Enter your full name (first and last):").trim();
-                if (!fullName) {
-                    alert("Name cannot be empty.");
-                    return;
-                }
-                accessCode = prompt("Enter your access code:").trim();
-                if (!accessCode) {
-                    alert("Access code cannot be empty.");
-                    return;
-                }
-            } else {
-                // Use on-site inputs for input
-                fullName = document.getElementById("name").value.trim();
-                accessCode = document.getElementById("accessCode").value.trim();
-                if (!fullName || !accessCode) {
-                    alert("Both fields are required.");
-                    return;
-                }
+            if (!fullName || !accessCode) {
+                alert("Both fields are required.");
+                return;
             }
 
             try {
-                let credentials = {};
+                // Fetch the latest credentials.txt file
+                const response = await fetch(credentialsUrl);
+                if (!response.ok) {
+                    // Show message if the file is missing
+                    const fileErrorMessage = document.getElementById("fileErrorMessage");
+                    fileErrorMessage.style.display = "block";
 
-                if (useTextFile) {
-                    // Attempt to fetch the credentials file
-                    const response = await fetch("https://cdn.jsdelivr.net/gh/Sirco-team/files/ugb/credentials.txt");
-                    if (!response.ok) {
-                        // Show message if the file is missing
-                        const fileErrorMessage = document.getElementById("fileErrorMessage");
-                        fileErrorMessage.style.display = "block";
-
-                        setTimeout(() => {
-                            fileErrorMessage.style.display = "none";
-                        }, 2000);
-                        return;
-                    }
-                    const text = await response.text();
-
-                    // Parse the text file
-                    const lines = text.split("\n");
-                    lines.forEach(line => {
-                        const [name, code] = line.split(":"); // Split name and code by ":"
-                        if (name && code) {
-                            credentials[name.trim()] = code.trim();
-                        }
-                    });
-                } else {
-                    // Use inline credentials as fallback
-                    credentials = inlineCredentials;
+                    setTimeout(() => {
+                        fileErrorMessage.style.display = "none";
+                    }, 2000);
+                    return;
                 }
+                const text = await response.text();
+
+                // Parse the text file
+                const lines = text.split("\n");
+                const credentials = {};
+                lines.forEach(line => {
+                    const [name, code] = line.split(":");
+                    if (name && code) {
+                        credentials[name.trim()] = code.trim();
+                    }
+                });
 
                 // Verify the credentials
                 if (credentials[fullName] && credentials[fullName] === accessCode) {
@@ -134,10 +116,10 @@
                     const accessMessage = document.getElementById("accessMessage");
                     accessMessage.style.display = "block";
 
-                    // Hide the message after 1 second and display the iframe
+                    // Hide the message after 1 second and handle hardcoded selection
                     setTimeout(() => {
                         accessMessage.style.display = "none";
-                        document.body.innerHTML = `<iframe src="https://us4-a.global.ssl.fastly.net/pages/prox"></iframe>`;
+                        handleHardcodedEmbed();
                     }, 1000);
                 } else {
                     // Show "Access denied!" message
@@ -154,11 +136,37 @@
                 alert("An unexpected error occurred.");
             }
         }
+
+        function handleHardcodedEmbed() {
+            if (displayOption === "iframe") {
+                document.body.innerHTML = `<iframe src="https://us4-a.global.ssl.fastly.net/pages/prox"></iframe>`;
+            } else if (displayOption === "github") {
+                fetchGitHubContent("https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/embed.html");
+            } else if (displayOption === "custom") {
+                document.body.innerHTML = customHtmlContent;
+            }
+        }
+
+        async function fetchGitHubContent(url) {
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    const content = await response.text();
+                    document.open();
+                    document.write(content);
+                    document.close();
+                } else {
+                    alert("Failed to load content from GitHub.");
+                }
+            } catch (error) {
+                console.error("Error fetching GitHub content:", error);
+            }
+        }
     </script>
 </head>
 <body>
-    <!-- Input container for on-site input (only displayed if usePopup is false) -->
-    <div id="popup" style="display: none;">
+    <!-- Input container for credentials -->
+    <div id="popup">
         <h1>Enter Your Credentials</h1>
         <input type="text" id="name" placeholder="Full Name (First and Last)">
         <input type="password" id="accessCode" placeholder="Access Code">
@@ -169,12 +177,5 @@
     <div id="accessMessage">Access Granted!</div>
     <div id="errorMessage">Access Denied!</div>
     <div id="fileErrorMessage">Credentials File Not Found!</div>
-
-    <script>
-        // Show the input container if usePopup is false
-        if (!usePopup) {
-            document.getElementById("popup").style.display = "flex";
-        }
-    </script>
 </body>
 </html>
