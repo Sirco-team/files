@@ -1,85 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dynamic Game Proxy | Dashboard</title>
+    <title>Dynamic Game Proxy | Multi-Tool</title>
     <link rel="icon" href="https://www.ixl.com/ixl-favicon.png">
     <style>
-        /* Style for the full-page proxy output */
-        #output {
-            width: 100%;
-            height: 100vh;
-            overflow: auto;
-            border: none;
+        /* Universal styles */
+        body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
         }
-        iframe {
-            width: 100%;
-            height: 100vh;
-            border: none;
+        h1, h3 {
+            text-align: center;
         }
-        /* Style for the input container */
-        #popup {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100vh;
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            font-family: Arial, sans-serif;
+        /* Login form styling */
+        #loginForm {
+            text-align: center;
+            margin-top: 100px;
         }
-        /* Style for input fields and buttons */
-        input, button {
+        #toolbox {
+            display: none; /* Hidden until successful login */
+            padding: 20px;
+        }
+        button {
+            cursor: pointer;
             margin: 10px;
             padding: 10px;
             font-size: 16px;
-        }
-        #loadWebsiteButton {
-            display: none; /* Hide until access is granted */
-            margin: 10px;
-            padding: 10px;
-            font-size: 18px;
             background-color: #28a745;
             color: white;
             border: none;
-            cursor: pointer;
+            border-radius: 5px;
         }
-        /* Style for success and error messages */
+        button:disabled {
+            background-color: #ccc; /* Disabled button styling */
+            cursor: not-allowed;
+        }
+        #output {
+            width: 100%;
+            height: 80vh;
+            overflow: auto;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            padding: 20px;
+        }
         #accessMessage, #errorMessage, #fileErrorMessage {
             display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 24px;
+            text-align: center;
+            padding: 10px;
+            font-size: 18px;
             font-weight: bold;
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            z-index: 1000;
+            margin-bottom: 20px;
         }
         #accessMessage {
             color: green;
-            border: 2px solid green;
         }
         #errorMessage {
             color: red;
-            border: 2px solid red;
         }
         #fileErrorMessage {
             color: orange;
-            border: 2px solid orange;
         }
     </style>
     <script>
         // URL for credentials.txt
         const credentialsUrl = "https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/credentials.txt";
 
-        // URL for Dynamic Proxy Website
+        // URL for the dynamic website
         const dynamicWebsiteUrl = "https://www.crazygames.com/";
 
         async function verifyNameAndCode() {
@@ -92,50 +80,26 @@
             }
 
             try {
-                // Fetch the latest credentials.txt file
+                // Fetch credentials.txt
                 const response = await fetch(credentialsUrl);
                 if (!response.ok) {
-                    // Show message if the file is missing
-                    const fileErrorMessage = document.getElementById("fileErrorMessage");
-                    fileErrorMessage.style.display = "block";
-
-                    setTimeout(() => {
-                        fileErrorMessage.style.display = "none";
-                    }, 2000);
+                    showError("fileErrorMessage");
                     return;
                 }
                 const text = await response.text();
 
-                // Parse the text file
-                const lines = text.split("\n");
+                // Parse credentials
                 const credentials = {};
-                lines.forEach(line => {
+                text.split("\n").forEach(line => {
                     const [name, code] = line.split(":");
-                    if (name && code) {
-                        credentials[name.trim()] = code.trim();
-                    }
+                    if (name && code) credentials[name.trim()] = code.trim();
                 });
 
-                // Verify the credentials
+                // Validate credentials
                 if (credentials[fullName] && credentials[fullName] === accessCode) {
-                    // Show "Access granted!" message
-                    const accessMessage = document.getElementById("accessMessage");
-                    accessMessage.style.display = "block";
-
-                    // Show the "Load Website" button after a short delay
-                    setTimeout(() => {
-                        accessMessage.style.display = "none";
-                        document.getElementById("loadWebsiteButton").style.display = "block";
-                    }, 1000);
+                    showAccessGranted();
                 } else {
-                    // Show "Access denied!" message
-                    const errorMessage = document.getElementById("errorMessage");
-                    errorMessage.style.display = "block";
-
-                    // Hide the message after 1 second
-                    setTimeout(() => {
-                        errorMessage.style.display = "none";
-                    }, 1000);
+                    showError("errorMessage");
                 }
             } catch (error) {
                 console.error("Error verifying credentials:", error);
@@ -143,23 +107,34 @@
             }
         }
 
+        function showAccessGranted() {
+            document.getElementById("accessMessage").style.display = "block";
+            setTimeout(() => {
+                document.getElementById("accessMessage").style.display = "none";
+                document.getElementById("loginForm").style.display = "none"; // Hide login form
+                document.getElementById("toolbox").style.display = "block"; // Show toolbox
+            }, 1000);
+        }
+
+        function showError(elementId) {
+            document.getElementById(elementId).style.display = "block";
+            setTimeout(() => {
+                document.getElementById(elementId).style.display = "none";
+            }, 2000);
+        }
+
         async function loadDynamicWebsite() {
+            const output = document.getElementById("output");
             try {
-                // Fetch the main HTML file
                 const response = await fetch(dynamicWebsiteUrl);
-                if (!response.ok) throw new Error("Unable to fetch the URL!");
+                if (!response.ok) throw new Error("Unable to fetch the website.");
 
                 const html = await response.text();
-
-                // Parse and display the fetched HTML
-                const outputDiv = document.getElementById("output");
-                outputDiv.innerHTML = html;
-
-                // Rewrite links to stay within the proxy
-                rewriteLinks(outputDiv, dynamicWebsiteUrl);
+                output.innerHTML = html;
+                rewriteLinks(output, dynamicWebsiteUrl); // Rewrite links for navigation
             } catch (error) {
                 console.error("Error loading website:", error);
-                alert("Failed to load the website. Make sure the URL is accessible.");
+                alert("Failed to load the website.");
             }
         }
 
@@ -168,12 +143,10 @@
             links.forEach(link => {
                 const href = link.getAttribute("href");
                 if (href && !href.startsWith("http")) {
-                    // Rewrite relative links to use the base URL
-                    const newUrl = new URL(href, baseUrl).href;
-                    link.setAttribute("href", "#");
-                    link.addEventListener("click", (e) => {
+                    link.href = "#";
+                    link.addEventListener("click", e => {
                         e.preventDefault();
-                        loadDynamicWebsite(newUrl);
+                        loadDynamicWebsite(new URL(href, baseUrl).href);
                     });
                 }
             });
@@ -181,21 +154,22 @@
     </script>
 </head>
 <body>
-    <!-- Input container for credentials -->
-    <div id="popup">
-        <h1>Enter Your Credentials</h1>
+    <!-- Login Form -->
+    <div id="loginForm">
+        <h1>Login to Access the Multi-Tool</h1>
+        <div id="accessMessage">Access Granted!</div>
+        <div id="errorMessage">Access Denied!</div>
+        <div id="fileErrorMessage">Credentials File Not Found!</div>
         <input type="text" id="name" placeholder="Full Name (First and Last)">
         <input type="password" id="accessCode" placeholder="Access Code">
-        <button onclick="verifyNameAndCode()">Submit</button>
+        <button onclick="verifyNameAndCode()">Login</button>
     </div>
 
-    <!-- Access messages -->
-    <div id="accessMessage">Access Granted!</div>
-    <div id="errorMessage">Access Denied!</div>
-    <div id="fileErrorMessage">Credentials File Not Found!</div>
-
-    <!-- Dynamic output area -->
-    <button id="loadWebsiteButton" onclick="loadDynamicWebsite()">Load Website</button>
-    <div id="output"></div>
+    <!-- Toolbox -->
+    <div id="toolbox">
+        <h1>Welcome to the Multi-Tool</h1>
+        <button id="dynamicMode" onclick="loadDynamicWebsite()">Load Dynamic Website</button>
+        <div id="output"></div>
+    </div>
 </body>
 </html>
