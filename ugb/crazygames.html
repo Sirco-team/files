@@ -4,7 +4,7 @@
     <title>Dynamic Game Proxy | Dashboard</title>
     <link rel="icon" href="https://www.ixl.com/ixl-favicon.png">
     <style>
-        /* Style for the full-page iframe or proxy output */
+        /* Style for the full-page proxy output */
         #output {
             width: 100%;
             height: 100vh;
@@ -38,6 +38,16 @@
             padding: 10px;
             font-size: 16px;
         }
+        #loadWebsiteButton {
+            display: none; /* Hide until access is granted */
+            margin: 10px;
+            padding: 10px;
+            font-size: 18px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
         /* Style for success and error messages */
         #accessMessage, #errorMessage, #fileErrorMessage {
             display: none;
@@ -69,14 +79,8 @@
         // URL for credentials.txt
         const credentialsUrl = "https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/credentials.txt";
 
-        // Hardcoded display options: "iframe", "github", "custom", "dynamic"
-        const displayOption = "dynamic"; // Change to "iframe", "github", or "custom" as needed
-
-        // Custom HTML content (used when displayOption is "custom")
-        const customHtmlContent = `
-            <h1>Welcome to Custom HTML</h1>
-            <p>This is a custom hardcoded HTML block.</p>
-        `;
+        // URL for Dynamic Proxy Website
+        const dynamicWebsiteUrl = "https://www.crazygames.com/";
 
         async function verifyNameAndCode() {
             const fullName = document.getElementById("name").value.trim();
@@ -118,10 +122,10 @@
                     const accessMessage = document.getElementById("accessMessage");
                     accessMessage.style.display = "block";
 
-                    // Hide the message after 1 second and handle display selection
+                    // Show the "Load Website" button after a short delay
                     setTimeout(() => {
                         accessMessage.style.display = "none";
-                        handleDisplayOption();
+                        document.getElementById("loadWebsiteButton").style.display = "block";
                     }, 1000);
                 } else {
                     // Show "Access denied!" message
@@ -139,38 +143,10 @@
             }
         }
 
-        function handleDisplayOption() {
-            if (displayOption === "iframe") {
-                document.body.innerHTML = `<iframe src="https://us4-a.global.ssl.fastly.net/pages/prox"></iframe>`;
-            } else if (displayOption === "github") {
-                fetchGitHubContent("https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/embed.html");
-            } else if (displayOption === "custom") {
-                document.body.innerHTML = customHtmlContent;
-            } else if (displayOption === "dynamic") {
-                loadWebsite("https://www.crazygames.com/");
-            }
-        }
-
-        async function fetchGitHubContent(url) {
-            try {
-                const response = await fetch(url);
-                if (response.ok) {
-                    const content = await response.text();
-                    document.open();
-                    document.write(content);
-                    document.close();
-                } else {
-                    alert("Failed to load content from GitHub.");
-                }
-            } catch (error) {
-                console.error("Error fetching GitHub content:", error);
-            }
-        }
-
-        async function loadWebsite(url) {
+        async function loadDynamicWebsite() {
             try {
                 // Fetch the main HTML file
-                const response = await fetch(url);
+                const response = await fetch(dynamicWebsiteUrl);
                 if (!response.ok) throw new Error("Unable to fetch the URL!");
 
                 const html = await response.text();
@@ -180,7 +156,7 @@
                 outputDiv.innerHTML = html;
 
                 // Rewrite links to stay within the proxy
-                rewriteLinks(outputDiv, url);
+                rewriteLinks(outputDiv, dynamicWebsiteUrl);
             } catch (error) {
                 console.error("Error loading website:", error);
                 alert("Failed to load the website. Make sure the URL is accessible.");
@@ -197,7 +173,7 @@
                     link.setAttribute("href", "#");
                     link.addEventListener("click", (e) => {
                         e.preventDefault();
-                        loadWebsite(newUrl);
+                        loadDynamicWebsite(newUrl);
                     });
                 }
             });
@@ -218,7 +194,8 @@
     <div id="errorMessage">Access Denied!</div>
     <div id="fileErrorMessage">Credentials File Not Found!</div>
 
-    <!-- Output area for dynamic loading -->
+    <!-- Dynamic output area -->
+    <button id="loadWebsiteButton" onclick="loadDynamicWebsite()">Load Website</button>
     <div id="output"></div>
 </body>
 </html>
