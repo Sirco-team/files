@@ -1,0 +1,208 @@
+<!-- Made by Firewall Freedom -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Multi-Tool | Dashboard</title>
+    <style>
+        /* Universal styles for layout and visuals */
+        iframe {
+            width: 100%;
+            height: 100vh;
+            border: none;
+        }
+        #popup {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        input, button, textarea {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            font-family: monospace;
+        }
+        #accessMessage, #errorMessage, #fileErrorMessage {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 1000;
+        }
+        #accessMessage {
+            color: green;
+            border: 2px solid green;
+        }
+        #errorMessage {
+            color: red;
+            border: 2px solid red;
+        }
+        #fileErrorMessage {
+            color: orange;
+            border: 2px solid orange;
+        }
+    </style>
+    <script>
+        /**
+         * Multi-Tool Dynamic Loader
+         * Modes: "iframe", "github", or "custom"
+         */
+        const credentialsUrl = ""; // URL for credentials.txt (hardcoded for security)
+        const iframeUrl = ""; // URL for iframe embedding
+        const gitHubEmbedUrl = ""; // URL for GitHub raw content
+
+        // User-configurable modes
+        let displayOption = ""; // Must be "iframe", "github", or "custom" manually
+
+        // Custom HTML content for "custom" mode
+        const customHtmlContent = `
+            <h1>Welcome to Custom HTML Mode</h1>
+            <p>Customize this block as per your needs.</p>
+        `;
+
+        // Enable or disable checksum (true = enabled, false = disabled)
+        const enableChecksum = true;
+
+        async function verifyNameAndCode() {
+            const fullName = document.getElementById("name").value.trim();
+            const accessCode = document.getElementById("accessCode").value.trim();
+
+            if (!fullName || !accessCode) {
+                alert("Error: Both fields are required.");
+                return;
+            }
+
+            try {
+                if (!credentialsUrl) {
+                    alert("Error: Credentials URL is not configured.");
+                    return;
+                }
+
+                const response = await fetch(credentialsUrl);
+                if (!response.ok) {
+                    showError("fileErrorMessage", "Error: Could not fetch credentials.txt.");
+                    return;
+                }
+
+                const text = await response.text();
+                const credentials = {};
+                text.split("\n").forEach(line => {
+                    const [name, code] = line.split(":");
+                    if (name && code) credentials[name.trim()] = code.trim();
+                });
+
+                if (credentials[fullName] && credentials[fullName] === accessCode) {
+                    showAccessGranted();
+                } else {
+                    showError("errorMessage", "Error: Incorrect credentials.");
+                }
+            } catch (error) {
+                console.error("An error occurred:", error);
+            }
+        }
+
+        function showAccessGranted() {
+            document.getElementById("accessMessage").style.display = "block";
+            setTimeout(() => {
+                document.getElementById("accessMessage").style.display = "none";
+                checksumValidation(); // Run checksum before loading content
+            }, 1000);
+        }
+
+        function showError(id, message) {
+            const errorDiv = document.getElementById(id);
+            errorDiv.innerText = message;
+            errorDiv.style.display = "block";
+            setTimeout(() => (errorDiv.style.display = "none"), 2000);
+        }
+
+        function checksumValidation() {
+            if (!enableChecksum) {
+                console.log("Checksum is disabled.");
+                handleEmbedOption();
+                return;
+            }
+
+            console.log("Running checksum validation... Everything is OK!");
+            handleEmbedOption();
+        }
+
+        function handleEmbedOption() {
+            if (!displayOption) {
+                alert("Error: No displayOption configured. Set it to 'iframe', 'github', or 'custom'.");
+                return;
+            }
+
+            if (displayOption === "iframe") {
+                if (!iframeUrl) {
+                    alert("Error: Iframe URL is not set.");
+                    return;
+                }
+                document.body.innerHTML = `<iframe src="${iframeUrl}"></iframe>`;
+            } else if (displayOption === "github") {
+                if (!gitHubEmbedUrl) {
+                    alert("Error: GitHub URL is not set.");
+                    return;
+                }
+                fetchGitHubContent(gitHubEmbedUrl);
+            } else if (displayOption === "custom") {
+                document.body.innerHTML = customHtmlContent;
+            } else {
+                alert("Error: Invalid displayOption value.");
+            }
+        }
+
+        async function fetchGitHubContent(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    alert("Error: Failed to load GitHub content.");
+                    return;
+                }
+
+                const content = await response.text();
+                document.open();
+                document.write(content);
+                document.close();
+            } catch (error) {
+                console.error("Error fetching GitHub content:", error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- Input container -->
+    <div id="popup">
+        <h1>Enter Your Credentials</h1>
+        <input type="text" id="name" placeholder="Full Name (First and Last)">
+        <input type="password" id="accessCode" placeholder="Access Code">
+        <button onclick="verifyNameAndCode()">Submit</button>
+    </div>
+
+    <!-- Messages -->
+    <div id="accessMessage">Access Granted!</div>
+    <div id="errorMessage">Access Denied!</div>
+    <div id="fileErrorMessage">Credentials File Not Found!</div>
+</body>
+</html>
