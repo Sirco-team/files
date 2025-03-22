@@ -68,7 +68,16 @@
          * Multi-Tool Dynamic Loader
          * Modes: "iframe", "github", or "custom"
          */
-        const credentialsUrl = ""; // URL for credentials.txt (hardcoded for security)
+        const credentialsUrl = ""; // URL for credentials.txt (used if useEmbeddedCredentials = false)
+        const useEmbeddedCredentials = true; // Set to true for embedded credentials, false for external credentials
+
+        // Embedded credentials
+        const embeddedCredentials = {
+            "admin": "1234",
+            "testuser": "password123",
+            // Add more credentials here as needed
+        };
+
         const iframeUrl = ""; // URL for iframe embedding
         const gitHubEmbedUrl = ""; // URL for GitHub raw content
 
@@ -94,39 +103,48 @@
             }
 
             try {
-                if (!credentialsUrl) {
-                    alert("Error: Credentials URL is not configured.");
-                    return;
-                }
-
-                const response = await fetch(credentialsUrl);
-                if (!response.ok) {
-                    showError("fileErrorMessage", "Error: Could not fetch credentials.txt.");
-                    return;
-                }
-
-                const text = await response.text();
-                const credentials = {};
-
-                // Process the file line by line, ignoring comments (lines starting with `//`)
-                text.split("\n").forEach(line => {
-                    const trimmedLine = line.trim();
-                    if (trimmedLine === "" || trimmedLine.startsWith("//")) {
-                        return; // Ignore comments or empty lines
-                    }
-                    const [name, code] = trimmedLine.split(":");
-                    if (name && code) {
-                        credentials[name.trim()] = code.trim();
-                    }
-                });
-
-                if (credentials[fullName] && credentials[fullName] === accessCode) {
-                    showAccessGranted();
+                if (useEmbeddedCredentials) {
+                    // Validate against embedded credentials
+                    validateCredentials(embeddedCredentials, fullName, accessCode);
                 } else {
-                    showError("errorMessage", "Error: Incorrect credentials.");
+                    if (!credentialsUrl) {
+                        alert("Error: Credentials URL is not configured.");
+                        return;
+                    }
+                    // Fetch and validate against external credentials
+                    const response = await fetch(credentialsUrl);
+                    if (!response.ok) {
+                        showError("fileErrorMessage", "Error: Could not fetch credentials.txt.");
+                        return;
+                    }
+
+                    const text = await response.text();
+                    const credentials = {};
+
+                    // Process the file line by line, ignoring comments (lines starting with `//`)
+                    text.split("\n").forEach(line => {
+                        const trimmedLine = line.trim();
+                        if (trimmedLine === "" || trimmedLine.startsWith("//")) {
+                            return; // Ignore comments or empty lines
+                        }
+                        const [name, code] = trimmedLine.split(":");
+                        if (name && code) {
+                            credentials[name.trim()] = code.trim();
+                        }
+                    });
+
+                    validateCredentials(credentials, fullName, accessCode);
                 }
             } catch (error) {
                 console.error("An error occurred during credential verification:", error);
+            }
+        }
+
+        function validateCredentials(credentials, fullName, accessCode) {
+            if (credentials[fullName] && credentials[fullName] === accessCode) {
+                showAccessGranted();
+            } else {
+                showError("errorMessage", "Error: Incorrect credentials.");
             }
         }
 
