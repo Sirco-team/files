@@ -1,13 +1,13 @@
-### README.md: Dynamic Multi-Tool & Raw GitHub Content Loader
+### Updated README.md: Dynamic Multi-Tool & Raw GitHub Content Loader
 
 # Dynamic Multi-Tool & Raw GitHub Content Loader
 
 ## Overview
-This repository contains two powerful tools:
-1. **Dynamic Multi-Tool HTML**: A versatile dashboard for iframe embedding, GitHub content fetching, and displaying custom HTML.
-2. **Raw GitHub Content Loader HTML**: A standalone tool for dynamically loading raw GitHub content and displaying it.
+This repository contains two tools designed for dynamic and seamless content embedding:
+1. **Dynamic Multi-Tool HTML**: A versatile dashboard capable of handling iframe embedding, GitHub content fetching, and custom HTML displays.
+2. **Raw GitHub Content Loader HTML**: A standalone HTML file for dynamically loading raw GitHub content.
 
-Both HTML files include robust error handling and validation mechanisms. Additionally, a checksum feature is included to verify the integrity of the HTML files, which can be toggled off for flexibility.
+Both tools have a checksum feature for validation, which can be toggled on or off. Additionally, the `credentials.txt` file now supports comments for improved manageability.
 
 ---
 
@@ -16,12 +16,13 @@ Both HTML files include robust error handling and validation mechanisms. Additio
 ### Key Features
 | **Feature**                     | **How It Works**                                                                                 |
 |----------------------------------|--------------------------------------------------------------------------------------------------|
-| **Login System**                | Requires users to enter valid credentials (username/password) stored in a `credentials.txt` file.|
-| **Iframe Mode**                 | Embeds an external URL using an iframe for displaying content.                                   |
-| **GitHub Mode**                 | Dynamically fetches and embeds raw HTML content from a GitHub URL.                              |
-| **Custom HTML Mode**            | Displays pre-defined custom HTML content tailored for user requirements.                        |
-| **Checksum Validation**         | Validates the HTML file's integrity before executing content-loading operations.                |
-| **Error Handling**              | Alerts users to missing credentials, unset URLs, or invalid configuration options.              |
+| **Login System**                | Requires users to authenticate using credentials stored in the `credentials.txt` file.           |
+| **Iframe Embedding**            | Displays external URLs in an iframe.                                                            |
+| **GitHub Content Fetching**     | Dynamically fetches and embeds raw HTML content from a GitHub URL.                              |
+| **Custom HTML Display**         | Displays pre-defined custom HTML, allowing for easy manual customization.                       |
+| **Checksum Validation**         | Ensures the file's integrity is verified before execution; can be toggled on/off.               |
+| **Comments in `credentials.txt`** | Lines starting with `//` are ignored, allowing you to document and manage credentials.           |
+| **Error Handling**              | Provides alerts for missing credentials, misconfigured display options, or fetch failures.      |
 
 ---
 
@@ -30,31 +31,38 @@ Both HTML files include robust error handling and validation mechanisms. Additio
 #### HTML Elements
 | **HTML Section**                | **Purpose**                                                                                     |
 |----------------------------------|-------------------------------------------------------------------------------------------------|
-| `<head>`                        | Includes CSS styling and JavaScript functions for functionality.                               |
-| `<div id="popup">...</div>`      | Contains the login form for user authentication.                                               |
-| `<div id="accessMessage">...</div>` | Displays a success message after a successful login.                                          |
-| `<div id="errorMessage">...</div>` | Displays an error message for failed login attempts.                                           |
-| `<div id="fileErrorMessage">...</div>` | Displays an error if the `credentials.txt` file cannot be fetched.                           |
-
----
-
-#### CSS
-| **CSS Rule**                    | **Explanation**                                                                                 |
-|----------------------------------|-------------------------------------------------------------------------------------------------|
-| `iframe { ... }`                | Defines full-page embedding for iframe content.                                                |
-| `#popup { ... }`                | Styles the login form for centered, full-page display.                                          |
-| `input, button { ... }`         | Styles input fields and buttons with padding, margins, and consistent font sizes.              |
-| `textarea { ... }`              | Adds styling for the `textarea` used in custom HTML input.                                     |
-
----
+| `<head>`                        | Includes CSS styling and JavaScript functions to control the functionality of the tool.         |
+| `<div id="popup">...</div>`      | Houses the login form for user authentication.                                                  |
+| `<div id="accessMessage">...</div>` | Displays a success message once login credentials are verified.                                 |
+| `<div id="errorMessage">...</div>` | Displays an error message for incorrect login credentials.                                      |
+| `<div id="fileErrorMessage">...</div>` | Displays an error message if the `credentials.txt` file cannot be fetched.                     |
 
 #### JavaScript Functions
-| **Function**                    | **Purpose**                                                                                     |
-|----------------------------------|-------------------------------------------------------------------------------------------------|
-| `verifyNameAndCode()`           | Validates user credentials against the fetched `credentials.txt` file.                         |
-| `handleEmbedOption()`           | Determines the mode (iframe, GitHub, or custom) and loads corresponding content.               |
-| `fetchGitHubContent()`          | Fetches and displays content from a specified GitHub URL.                                      |
-| `checksumValidation()`          | Runs a checksum to ensure the integrity of the HTML file. Can be toggled on/off.               |
+| **Function**                    | **What It Does**                                                                                 |
+|----------------------------------|--------------------------------------------------------------------------------------------------|
+| `verifyNameAndCode()`           | Reads and validates the username and password against the fetched `credentials.txt` file.         |
+| `checksumValidation()`          | Ensures the integrity of the HTML file before loading content. Can be disabled if necessary.      |
+| `handleEmbedOption()`           | Determines which display mode to activate (`iframe`, `github`, or `custom`) and loads it.        |
+| `fetchGitHubContent(url)`       | Fetches and embeds raw HTML content from the provided GitHub URL.                                |
+
+---
+
+#### `credentials.txt` File
+| **Format**                      | **Explanation**                                                                                 |
+|----------------------------------|--------------------------------------------------------------------------------------------------|
+| `username:password`             | Each line represents a username-password pair for login.                                         |
+| `//`                            | Any line starting with `//` is treated as a comment and ignored during validation.               |
+
+#### Example `credentials.txt`
+```
+// Admin credentials
+admin:1234
+
+// Test account credentials
+testuser:password123
+
+// Notes: The above credentials are for testing only.
+```
 
 ---
 
@@ -63,10 +71,10 @@ Both HTML files include robust error handling and validation mechanisms. Additio
 ### Key Features
 | **Feature**                     | **How It Works**                                                                                 |
 |----------------------------------|--------------------------------------------------------------------------------------------------|
-| **Dynamic Content Fetching**    | Automatically fetches and displays raw HTML content from a GitHub URL.                         |
-| **Error Handling**              | Displays specific error messages for missing URLs or failed fetch requests.                     |
-| **Live Updates**                | Always loads the latest version of the GitHub raw content hosted at the specified URL.          |
-| **Minimal Design**              | Optimized for simplicity and ease of use.                                                      |
+| **Dynamic Content Fetching**    | Automatically fetches and displays raw HTML content from a GitHub URL.                          |
+| **Error Handling**              | Provides descriptive error messages for missing or invalid GitHub URLs.                         |
+| **Live Updates**                | Always displays the latest version of the raw GitHub content without requiring manual updates.   |
+| **Minimal Design**              | Designed with simplicity and clarity in mind for easy usage.                                     |
 
 ---
 
@@ -74,51 +82,51 @@ Both HTML files include robust error handling and validation mechanisms. Additio
 
 #### HTML Elements
 | **HTML Section**                | **Purpose**                                                                                     |
-|----------------------------------|-------------------------------------------------------------------------------------------------|
-| `<head>`                        | Includes JavaScript for fetching and displaying GitHub content.                                |
-| `<body>`                        | Displays loading and error messages dynamically during content fetching.                       |
-| `<p id="loadingMessage">...</p>` | Informs the user that content is being loaded.                                                  |
-| `<p id="errorMessage">...</p>`   | Displays any errors encountered during the fetch process.                                       |
+|----------------------------------|--------------------------------------------------------------------------------------------------|
+| `<head>`                        | Includes the required JavaScript for fetching and displaying GitHub content.                   |
+| `<body>`                        | Displays loading and error messages during the content-fetching process.                       |
+| `<p id="loadingMessage">...</p>` | Shows a message indicating content is being loaded from GitHub.                                 |
+| `<p id="errorMessage">...</p>`   | Displays errors dynamically if the content fetch fails.                                         |
 
 ---
 
-#### CSS
-| **CSS Rule**                    | **Explanation**                                                                                 |
-|----------------------------------|-------------------------------------------------------------------------------------------------|
-| `body { ... }`                  | Centers content on the page and defines universal font and background color settings.           |
-| `#loadingMessage { ... }`       | Styles the loading message with blue text for emphasis.                                         |
-| `#errorMessage { ... }`         | Styles error messages with red text for visibility.                                             |
+### How the Tools Work Together
+Both tools are designed to handle dynamic content embedding, but they serve slightly different purposes:
+1. **Dynamic Multi-Tool HTML**: Ideal for integrating multiple content-display modes in one location.
+2. **Raw GitHub Content Loader HTML**: Optimized for seamlessly pulling and displaying raw HTML content from GitHub repositories.
 
 ---
 
-#### JavaScript Functions
-| **Function**                    | **Purpose**                                                                                     |
-|----------------------------------|-------------------------------------------------------------------------------------------------|
-| `loadFromGitHub(url)`           | Fetches and loads raw HTML content from the specified GitHub URL.                              |
-| `displayError(message)`         | Displays error messages dynamically during failed fetch attempts.                              |
+### Configuration Instructions
 
----
+#### Sensitive URLs
+Before using either HTML file, you must configure the following:
+- **`credentialsUrl`**: URL for the `credentials.txt` file (required for the Multi-Tool HTML file).
+- **`iframeUrl`**: URL for iframe embedding in the Multi-Tool HTML.
+- **`gitHubEmbedUrl`**: URL for GitHub content embedding in the Multi-Tool HTML.
+- **`gitHubRawUrl`**: URL for the content to be dynamically fetched in the Raw GitHub Content Loader HTML.
 
-## Configuration Instructions
-
-### Sensitive URLs
-Before deploying these files, configure the following variables:
-- **`credentialsUrl`**: URL for the `credentials.txt` file.
-- **`iframeUrl`**: URL for iframe embedding.
-- **`gitHubEmbedUrl`**: URL for GitHub raw content embedding.
-
-### Checksum Validation
-To enable or disable checksum:
-- Find the `enableChecksum` variable and set it to `true` or `false`.
-- When enabled (`true`), ensures the HTML file’s integrity is validated before execution.
+#### Checksum Validation
+To enable or disable checksum validation:
+- Locate the `enableChecksum` variable in the JavaScript of each HTML file.
+- Set it to `true` to enable validation or `false` to disable it.
 
 ---
 
 ### Error Handling Summary
 
-| **Error Scenario**              | **Message**                                                                                     |
-|----------------------------------|-------------------------------------------------------------------------------------------------|
-| Missing URL                      | Alerts user to configure the required URL(s).                                                 |
-| Invalid Credentials              | Displays an error message for incorrect username/password.                                    |
-| Failed Fetch Requests            | Alerts user to check the specified URL or their network connection.                          |
-| Unset `displayOption`            | Prompts user to manually configure the display mode (iframe, GitHub, or custom).             |
+| **Error Scenario**              | **Resolution**                                                                                  |
+|----------------------------------|--------------------------------------------------------------------------------------------------|
+| **Missing URL Configuration**   | Alerts user to set required variables (`credentialsUrl`, `iframeUrl`, etc.).                    |
+| **Invalid Credentials**         | Prompts user to check and re-enter their username and password.                                  |
+| **Failed Fetch Requests**       | Displays error messages if URLs are unreachable or content is unavailable.                      |
+| **Unset Display Option**         | Alerts user to configure the `displayOption` variable properly.                                 |
+
+---
+
+### Final Notes
+- These tools are designed to securely and dynamically embed content while maintaining flexibility and user control.
+- Comments in the `credentials.txt` file make it easier to manage and document credentials without disrupting functionality.
+- The tools are lightweight, well-documented, and easy to extend for additional functionality as needed.
+
+---
