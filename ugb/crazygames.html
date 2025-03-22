@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dynamic Game Proxy | Multi-Tool</title>
+    <title>Multi-Tool | Dashboard</title>
     <link rel="icon" href="https://www.ixl.com/ixl-favicon.png">
     <style>
-        /* Universal styles */
+        /* Universal styling */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -14,28 +14,14 @@
         h1, h3 {
             text-align: center;
         }
-        /* Login form styling */
-        #loginForm {
-            text-align: center;
-            margin-top: 100px;
-        }
         #toolbox {
             display: none; /* Hidden until successful login */
             padding: 20px;
         }
-        button {
-            cursor: pointer;
-            margin: 10px;
-            padding: 10px;
-            font-size: 16px;
-            background-color: #28a745;
-            color: white;
+        iframe {
+            width: 100%;
+            height: 80vh;
             border: none;
-            border-radius: 5px;
-        }
-        button:disabled {
-            background-color: #ccc; /* Disabled button styling */
-            cursor: not-allowed;
         }
         #output {
             width: 100%;
@@ -44,6 +30,22 @@
             border: 1px solid #ddd;
             background-color: #fff;
             padding: 20px;
+        }
+        input, button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            cursor: pointer;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:disabled {
+            background-color: #ccc; /* Disabled button styling */
+            cursor: not-allowed;
         }
         #accessMessage, #errorMessage, #fileErrorMessage {
             display: none;
@@ -67,8 +69,15 @@
         // URL for credentials.txt
         const credentialsUrl = "https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/credentials.txt";
 
-        // URL for the dynamic website
-        const dynamicWebsiteUrl = "https://www.crazygames.com/";
+        // URLs for iframe and GitHub
+        const iframeUrl = "https://us4-a.global.ssl.fastly.net/pages/prox";
+        const gitHubEmbedUrl = "https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/embed.html";
+
+        // Custom HTML content
+        const customHtmlContent = `
+            <h1>Welcome to the Multi-Tool</h1>
+            <p>This is your customizable HTML block!</p>
+        `;
 
         async function verifyNameAndCode() {
             const fullName = document.getElementById("name").value.trim();
@@ -123,40 +132,34 @@
             }, 2000);
         }
 
-        async function loadDynamicWebsite() {
+        function loadIframe() {
+            const output = document.getElementById("output");
+            output.innerHTML = `<iframe src="${iframeUrl}"></iframe>`;
+        }
+
+        async function loadGitHubContent() {
             const output = document.getElementById("output");
             try {
-                const response = await fetch(dynamicWebsiteUrl);
-                if (!response.ok) throw new Error("Unable to fetch the website.");
+                const response = await fetch(gitHubEmbedUrl);
+                if (!response.ok) throw new Error("Failed to fetch GitHub content.");
 
                 const html = await response.text();
                 output.innerHTML = html;
-                rewriteLinks(output, dynamicWebsiteUrl); // Rewrite links for navigation
             } catch (error) {
-                console.error("Error loading website:", error);
-                alert("Failed to load the website.");
+                console.error("Error loading GitHub content:", error);
+                alert("Failed to load GitHub content.");
             }
         }
 
-        function rewriteLinks(container, baseUrl) {
-            const links = container.querySelectorAll("a");
-            links.forEach(link => {
-                const href = link.getAttribute("href");
-                if (href && !href.startsWith("http")) {
-                    link.href = "#";
-                    link.addEventListener("click", e => {
-                        e.preventDefault();
-                        loadDynamicWebsite(new URL(href, baseUrl).href);
-                    });
-                }
-            });
+        function loadCustomHtml() {
+            document.getElementById("output").innerHTML = customHtmlContent;
         }
     </script>
 </head>
 <body>
     <!-- Login Form -->
     <div id="loginForm">
-        <h1>Login to Access the Multi-Tool</h1>
+        <h1>Multi-Tool Login</h1>
         <div id="accessMessage">Access Granted!</div>
         <div id="errorMessage">Access Denied!</div>
         <div id="fileErrorMessage">Credentials File Not Found!</div>
@@ -168,7 +171,9 @@
     <!-- Toolbox -->
     <div id="toolbox">
         <h1>Welcome to the Multi-Tool</h1>
-        <button id="dynamicMode" onclick="loadDynamicWebsite()">Load Dynamic Website</button>
+        <button onclick="loadIframe()">Load Iframe</button>
+        <button onclick="loadGitHubContent()">Load GitHub Content</button>
+        <button onclick="loadCustomHtml()">Load Custom HTML</button>
         <div id="output"></div>
     </div>
 </body>
