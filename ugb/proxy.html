@@ -69,17 +69,17 @@
          * Modes: "iframe", "github", or "custom"
          */
         const credentialsUrl = "https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/credentials.txt"; // URL for credentials.txt (used if useEmbeddedCredentials = false)
-        const useEmbeddedCredentials = false; // Set to true for embedded credentials, false for external credentials
+        let useEmbeddedCredentials; // Must be explicitly set to true or false; left unset by default
+        const iframeUrl = "https://us4-a.global.ssl.fastly.net/pages/prox"; // URL for iframe embedding
+        const gitHubEmbedUrl = ""; // URL for GitHub raw content
 
         // Embedded credentials
         const embeddedCredentials = {
-            "admin": "1234",
-            "testuser": "password123",
-            // Add more credentials here as needed
+            // Add embedded credentials here if useEmbeddedCredentials = true
+            // Example:
+            // "admin": "1234",
+            // "testuser": "password123"
         };
-
-        const iframeUrl = "https://us4-a.global.ssl.fastly.net/pages/prox"; // URL for iframe embedding
-        const gitHubEmbedUrl = ""; // URL for GitHub raw content
 
         // User-configurable modes
         let displayOption = "iframe"; // Must be "iframe", "github", or "custom" manually
@@ -103,6 +103,11 @@
             }
 
             try {
+                if (useEmbeddedCredentials === undefined) {
+                    alert("Error: Credentials type (embedded or external) is not configured. Please set useEmbeddedCredentials to true or false.");
+                    return;
+                }
+
                 if (useEmbeddedCredentials) {
                     // Validate against embedded credentials
                     validateCredentials(embeddedCredentials, fullName, accessCode);
