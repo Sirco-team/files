@@ -155,10 +155,17 @@
 
         function validateCredentials(credentials, fullName, accessCode) {
             if (credentials[fullName] && credentials[fullName] === accessCode) {
-                showMessage("accessMessage", "Access Granted!");
+                showAccessGranted(); // Calls function to display success and load content
             } else {
                 showMessage("errorMessage", "Error: Incorrect credentials.");
             }
+        }
+
+        function showAccessGranted() {
+            showMessage("accessMessage", "Access Granted!"); // Show success message
+            setTimeout(() => {
+                checksumValidation(); // Perform checksum validation after success
+            }, 2000); // Allow message to display briefly
         }
 
         function showMessage(id, message) {
