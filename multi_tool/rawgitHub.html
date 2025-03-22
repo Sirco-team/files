@@ -1,0 +1,58 @@
+<!-- Made by Firewall Freedom -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Content Loader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+            text-align: center;
+        }
+        #loadingMessage, #errorMessage {
+            font-size: 18px;
+        }
+        #loadingMessage {
+            color: #007bff;
+        }
+        #errorMessage {
+            color: red;
+        }
+    </style>
+    <script>
+        const gitHubRawUrl = ""; // Hardcoded GitHub URL here
+
+        async function loadFromGitHub(url) {
+            try {
+                if (!url) throw new Error("GitHub URL is missing.");
+
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Failed to fetch content.");
+
+                const content = await response.text();
+                document.open();
+                document.write(content);
+                document.close();
+            } catch (error) {
+                document.getElementById("errorMessage").textContent = error.message;
+            }
+        }
+
+        loadFromGitHub(gitHubRawUrl);
+    </script>
+</head>
+<body>
+    <h1>Loading GitHub Content...</h1>
+    <p id="loadingMessage">Fetching content...</p>
+    <p id="errorMessage"></p>
+</body>
+</html>
