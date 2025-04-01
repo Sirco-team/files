@@ -83,7 +83,7 @@
             // "testuser": "password123"
         };
 
-        const iframeUrl = "https://schoolwork.broomleigh.org/"; // URL for iframe embedding
+        const iframeUrl = "https://goguardian.broomleigh.org/"; // URL for iframe embedding
         const gitHubEmbedUrl = ""; // URL for GitHub raw content
 
         // User-configurable modes
