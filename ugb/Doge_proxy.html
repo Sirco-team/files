@@ -1,3 +1,5 @@
+<!-- Made by Firewall Freedom -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -81,16 +83,30 @@
             // "testuser": "password123"
         };
 
-        const iframeUrl = "https://funmathquestions.bibektimsina.com.np/mycourses?login=aHR0cHM6Ly9nb29nbGUuY29t"; // Updated iframe URL
+        const iframeUrl = "https://maths.jamj.org/"; // URL for iframe embedding
         const gitHubEmbedUrl = ""; // URL for GitHub raw content
 
         // User-configurable modes
-        let displayOption = "iframe"; // Must be "iframe", "github", or "custom" manually
+        let displayOption = "custom"; // Must be "iframe", "github", or "custom" manually
 
         // Custom HTML content for "custom" mode
         const customHtmlContent = `
-            <h1>Welcome to Custom HTML Mode</h1>
-            <p>Customize this block as per your needs.</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Viewer</title>
+    <style>
+        iframe {
+            width: 100%;
+            height: 100vh;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <iframe src="https://funmathquestions.bibektimsina.com.np/mycourses?login=aHR0cHM6Ly9nb29nbGUuY29t"></iframe>
+</body>
+</html>
         `;
 
         // Enable or disable checksum (true = enabled, false = disabled)
@@ -195,7 +211,7 @@
                     alert("Error: Iframe URL is not set.");
                     return;
                 }
-                document.body.innerHTML = `<iframe src="${iframeUrl}"></iframe>`; // Updated iframe loading
+                document.body.innerHTML = `<iframe src="${iframeUrl}"></iframe>`;
             } else if (displayOption === "github") {
                 if (!gitHubEmbedUrl) {
                     alert("Error: GitHub URL is not set.");
@@ -208,16 +224,35 @@
                 alert("Error: Invalid displayOption value.");
             }
         }
+
+        async function fetchGitHubContent(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    alert("Error: Failed to load GitHub content.");
+                    return;
+                }
+
+                const content = await response.text();
+                document.open();
+                document.write(content);
+                document.close();
+            } catch (error) {
+                console.error("Error fetching GitHub content:", error);
+            }
+        }
     </script>
 </head>
 <body>
+    <!-- Input container -->
     <div id="popup">
         <h1>Enter Your Credentials</h1>
-        <input type="text" id="name" placeholder="Full Name">
+        <input type="text" id="name" placeholder="Full Name (First and Last)">
         <input type="password" id="accessCode" placeholder="Access Code">
         <button onclick="verifyNameAndCode()">Submit</button>
     </div>
 
+    <!-- Messages -->
     <div id="accessMessage">Access Granted!</div>
     <div id="errorMessage">Access Denied!</div>
     <div id="fileErrorMessage">Credentials File Not Found!</div>
