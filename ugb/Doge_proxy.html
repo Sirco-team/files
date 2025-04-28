@@ -25,17 +25,12 @@
             color: white;
             font-family: Arial, sans-serif;
         }
-        input, button, textarea {
+        input, button {
             margin: 10px;
             padding: 10px;
             font-size: 16px;
         }
-        textarea {
-            width: 100%;
-            height: 300px;
-            font-family: monospace;
-        }
-        #accessMessage, #errorMessage, #fileErrorMessage, #emptyFieldsMessage {
+        #accessMessage, #errorMessage, #fileErrorMessage {
             display: none;
             position: absolute;
             top: 50%;
@@ -60,65 +55,48 @@
             color: orange;
             border: 2px solid orange;
         }
-        #emptyFieldsMessage {
-            color: blue;
-            border: 2px solid blue;
-        }
     </style>
     <script>
-        /**
-         * Multi-Tool Dynamic Loader
-         * Modes: "iframe", "github", or "custom"
-         */
         const credentialsUrl = "https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/credentials.txt";
         const iframeUrl = "https://funmathquestions.bibektimsina.com.np/mycourses?login=aHR0cHM6Ly9nb29nbGUuY29t"; 
-        const gitHubEmbedUrl = "https://raw.githubusercontent.com/Sirco-team/files/main/ugb/Doge_proxy.html"; // GitHub raw content URL
-        let displayOption = "iframe"; // Must be "iframe", "github", or "custom"
 
-        async function verifyNameAndCode() {
-            const fullName = document.getElementById("name").value.trim();
-            const accessCode = document.getElementById("accessCode").value.trim();
+        async function verifyAccess() {
+            const enteredUsername = document.getElementById("username").value.trim();
+            const enteredPassword = document.getElementById("password").value.trim();
 
-            if (!fullName || !accessCode) {
-                showMessage("emptyFieldsMessage", "Error: Both fields are required.");
+            if (!enteredUsername || !enteredPassword) {
+                alert("Error: Both fields are required.");
                 return;
             }
 
             try {
                 const response = await fetch(credentialsUrl);
-                if (!response.ok) {
-                    showMessage("fileErrorMessage", "Error: Could not fetch credentials.txt.");
-                    return;
-                }
+                if (!response.ok) throw new Error("Failed to fetch credentials.");
 
                 const text = await response.text();
                 const credentials = {};
 
+                // Process the file, ignoring commented-out lines (`//`)
                 text.split("\n").forEach(line => {
                     const trimmedLine = line.trim();
                     if (trimmedLine === "" || trimmedLine.startsWith("//")) return;
 
-                    const [name, code] = trimmedLine.split(":");
-                    if (name && code) {
-                        credentials[name.trim()] = code.trim();
+                    const [storedUsername, storedPassword] = trimmedLine.split(":");
+                    if (storedUsername && storedPassword) {
+                        credentials[storedUsername.trim()] = storedPassword.trim();
                     }
                 });
 
-                if (credentials[fullName] && credentials[fullName] === accessCode) {
-                    showAccessGranted();
+                if (credentials[enteredUsername] && credentials[enteredUsername] === enteredPassword) {
+                    document.getElementById("popup").style.display = "none";
+                    document.body.innerHTML = `<iframe src="${iframeUrl}"></iframe>`;
                 } else {
                     showMessage("errorMessage", "Error: Incorrect credentials.");
                 }
             } catch (error) {
                 console.error("Error verifying credentials:", error);
+                showMessage("fileErrorMessage", "Error: Failed to load credentials.");
             }
-        }
-
-        function showAccessGranted() {
-            showMessage("accessMessage", "Access Granted!");
-            setTimeout(() => {
-                handleEmbedOption();
-            }, 2000);
         }
 
         function showMessage(id, message) {
@@ -127,53 +105,20 @@
             messageDiv.style.display = "block";
             setTimeout(() => (messageDiv.style.display = "none"), 2000);
         }
-
-        function handleEmbedOption() {
-            if (!displayOption) {
-                alert("Error: No displayOption configured.");
-                return;
-            }
-
-            if (displayOption === "iframe") {
-                document.body.innerHTML = `<iframe src="${iframeUrl}"></iframe>`;
-            } else if (displayOption === "github") {
-                fetchGitHubContent(gitHubEmbedUrl);
-            } else if (displayOption === "custom") {
-                document.body.innerHTML = `<h1>Welcome to Custom HTML Mode</h1><p>Customize this block as needed.</p>`;
-            } else {
-                alert("Error: Invalid displayOption value.");
-            }
-        }
-
-        async function fetchGitHubContent(url) {
-            try {
-                const response = await fetch(`${url}?nocache=${new Date().getTime()}`);
-                if (!response.ok) {
-                    alert("Error: Failed to load GitHub content.");
-                    return;
-                }
-
-                const content = await response.text();
-                document.body.innerHTML = content;
-            } catch (error) {
-                console.error("Error fetching GitHub content:", error);
-            }
-        }
     </script>
 </head>
 <body>
-    <!-- Input container -->
+    <!-- Login Input -->
     <div id="popup">
         <h1>Enter Your Credentials</h1>
-        <input type="text" id="name" placeholder="Full Name (First and Last)">
-        <input type="password" id="accessCode" placeholder="Access Code">
-        <button onclick="verifyNameAndCode()">Submit</button>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Access Code">
+        <button onclick="verifyAccess()">Login</button>
     </div>
 
     <!-- Messages -->
     <div id="accessMessage">Access Granted!</div>
     <div id="errorMessage">Access Denied!</div>
     <div id="fileErrorMessage">Credentials File Not Found!</div>
-    <div id="emptyFieldsMessage">Both fields must be filled out!</div>
 </body>
 </html>
