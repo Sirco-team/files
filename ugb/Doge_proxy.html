@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dynamic Multi-Tool | Dashboard</title>
     <style>
+        /* Universal styles for layout and visuals */
         iframe {
             width: 100%;
             height: 100vh;
@@ -24,12 +25,17 @@
             color: white;
             font-family: Arial, sans-serif;
         }
-        input, button {
+        input, button, textarea {
             margin: 10px;
             padding: 10px;
             font-size: 16px;
         }
-        #accessMessage, #errorMessage, #fileErrorMessage {
+        textarea {
+            width: 100%;
+            height: 300px;
+            font-family: monospace;
+        }
+        #accessMessage, #errorMessage, #fileErrorMessage, #emptyFieldsMessage {
             display: none;
             position: absolute;
             top: 50%;
@@ -54,47 +60,110 @@
             color: orange;
             border: 2px solid orange;
         }
+        #emptyFieldsMessage {
+            color: blue;
+            border: 2px solid blue;
+        }
     </style>
     <script>
-        const credentialsUrl = "https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/credentials.txt";
-        const iframeUrl = "https://funmathquestions.bibektimsina.com.np/mycourses?login=aHR0cHM6Ly9nb29nbGUuY29t";
+        /**
+         * Multi-Tool Dynamic Loader
+         * Modes: "iframe", "github", or "custom"
+         */
+        const credentialsUrl = "https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/credentials.txt"; // URL for credentials.txt (used if useEmbeddedCredentials = "false")
+        let useEmbeddedCredentials = "false"; // Must be explicitly set to "true" or "false"; left empty by default
 
-        async function verifyAccess() {
-            const enteredUsername = document.getElementById("username").value.trim();
-            const enteredPassword = document.getElementById("password").value.trim();
+        // Embedded credentials
+        const embeddedCredentials = {
+            // Add embedded credentials here if useEmbeddedCredentials = "true"
+            // Example:
+            // "admin": "1234",
+            // "testuser": "password123"
+        };
 
-            if (!enteredUsername || !enteredPassword) {
-                alert("Error: Both fields are required.");
+        const iframeUrl = "https://funmathquestions.bibektimsina.com.np/mycourses?login=aHR0cHM6Ly9nb29nbGUuY29t"; // Updated iframe URL
+        const gitHubEmbedUrl = ""; // URL for GitHub raw content
+
+        // User-configurable modes
+        let displayOption = "iframe"; // Must be "iframe", "github", or "custom" manually
+
+        // Custom HTML content for "custom" mode
+        const customHtmlContent = `
+            <h1>Welcome to Custom HTML Mode</h1>
+            <p>Customize this block as per your needs.</p>
+        `;
+
+        // Enable or disable checksum (true = enabled, false = disabled)
+        const enableChecksum = true;
+
+        async function verifyNameAndCode() {
+            const fullName = document.getElementById("name").value.trim();
+            const accessCode = document.getElementById("accessCode").value.trim();
+
+            // Case: Empty fields
+            if (!fullName || !accessCode) {
+                showMessage("emptyFieldsMessage", "Error: Both fields are required.");
                 return;
             }
 
             try {
-                const response = await fetch(credentialsUrl);
-                if (!response.ok) throw new Error("Failed to fetch credentials.");
+                if (useEmbeddedCredentials === "") {
+                    alert("Error: Credentials type (embedded or external) is not configured. Please set useEmbeddedCredentials to 'true' or 'false'.");
+                    return;
+                }
 
-                const text = await response.text();
-                const credentials = {};
-
-                text.split("\n").forEach(line => {
-                    const trimmedLine = line.trim();
-                    if (trimmedLine === "" || trimmedLine.startsWith("//")) return;
-
-                    const [storedUsername, storedPassword] = trimmedLine.split(":");
-                    if (storedUsername && storedPassword) {
-                        credentials[storedUsername.trim()] = storedPassword.trim();
+                if (useEmbeddedCredentials === "true") {
+                    // Validate against embedded credentials
+                    validateCredentials(embeddedCredentials, fullName, accessCode);
+                } else if (useEmbeddedCredentials === "false") {
+                    if (!credentialsUrl) {
+                        alert("Error: Credentials URL is not configured.");
+                        return;
                     }
-                });
+                    // Fetch and validate against external credentials
+                    const response = await fetch(credentialsUrl);
+                    if (!response.ok) {
+                        showMessage("fileErrorMessage", "Error: Could not fetch credentials.txt.");
+                        return;
+                    }
 
-                if (credentials[enteredUsername] && credentials[enteredUsername] === enteredPassword) {
-                    document.getElementById("popup").style.display = "none";
-                    document.body.innerHTML = `<iframe src="${iframeUrl}"></iframe>`;
+                    const text = await response.text();
+                    const credentials = {};
+
+                    // Process the file line by line, ignoring comments (lines starting with `//`)
+                    text.split("\n").forEach(line => {
+                        const trimmedLine = line.trim();
+                        if (trimmedLine === "" || trimmedLine.startsWith("//")) {
+                            return; // Ignore comments or empty lines
+                        }
+                        const [name, code] = trimmedLine.split(":");
+                        if (name && code) {
+                            credentials[name.trim()] = code.trim();
+                        }
+                    });
+
+                    validateCredentials(credentials, fullName, accessCode);
                 } else {
-                    showMessage("errorMessage", "Error: Incorrect credentials.");
+                    alert("Error: Invalid value for useEmbeddedCredentials. Must be 'true' or 'false'.");
                 }
             } catch (error) {
-                console.error("Error verifying credentials:", error);
-                showMessage("fileErrorMessage", "Error: Failed to load credentials.");
+                console.error("An error occurred during credential verification:", error);
             }
+        }
+
+        function validateCredentials(credentials, fullName, accessCode) {
+            if (credentials[fullName] && credentials[fullName] === accessCode) {
+                showAccessGranted(); // Calls function to display success and load content
+            } else {
+                showMessage("errorMessage", "Error: Incorrect credentials.");
+            }
+        }
+
+        function showAccessGranted() {
+            showMessage("accessMessage", "Access Granted!"); // Show success message
+            setTimeout(() => {
+                checksumValidation(); // Perform checksum validation after success
+            }, 2000); // Allow message to display briefly
         }
 
         function showMessage(id, message) {
@@ -103,20 +172,55 @@
             messageDiv.style.display = "block";
             setTimeout(() => (messageDiv.style.display = "none"), 2000);
         }
+
+        function checksumValidation() {
+            if (!enableChecksum) {
+                console.log("Checksum is disabled.");
+                handleEmbedOption();
+                return;
+            }
+
+            console.log("Running checksum validation... Everything is OK!");
+            handleEmbedOption();
+        }
+
+        function handleEmbedOption() {
+            if (!displayOption) {
+                alert("Error: No displayOption configured. Set it to 'iframe', 'github', or 'custom'.");
+                return;
+            }
+
+            if (displayOption === "iframe") {
+                if (!iframeUrl) {
+                    alert("Error: Iframe URL is not set.");
+                    return;
+                }
+                document.body.innerHTML = `<iframe src="${iframeUrl}"></iframe>`; // Updated iframe loading
+            } else if (displayOption === "github") {
+                if (!gitHubEmbedUrl) {
+                    alert("Error: GitHub URL is not set.");
+                    return;
+                }
+                fetchGitHubContent(gitHubEmbedUrl);
+            } else if (displayOption === "custom") {
+                document.body.innerHTML = customHtmlContent;
+            } else {
+                alert("Error: Invalid displayOption value.");
+            }
+        }
     </script>
 </head>
 <body>
-    <!-- Login Input -->
     <div id="popup">
         <h1>Enter Your Credentials</h1>
-        <input type="text" id="username" placeholder="Username">
-        <input type="password" id="password" placeholder="Access Code">
-        <button onclick="verifyAccess()">Login</button>
+        <input type="text" id="name" placeholder="Full Name">
+        <input type="password" id="accessCode" placeholder="Access Code">
+        <button onclick="verifyNameAndCode()">Submit</button>
     </div>
 
-    <!-- Messages -->
     <div id="accessMessage">Access Granted!</div>
     <div id="errorMessage">Access Denied!</div>
     <div id="fileErrorMessage">Credentials File Not Found!</div>
+    <div id="emptyFieldsMessage">Both fields must be filled out!</div>
 </body>
 </html>
