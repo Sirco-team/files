@@ -83,16 +83,30 @@
             // "testuser": "password123"
         };
 
-        const iframeUrl = "funmathquestions.bibektimsina.com.np/mycourses?login=aHR0cHM6Ly9nb29nbGUuY29t"; // URL for iframe embedding
+        const iframeUrl = "https://maths.jamj.org/"; // URL for iframe embedding
         const gitHubEmbedUrl = ""; // URL for GitHub raw content
 
         // User-configurable modes
-        let displayOption = "iframe"; // Must be "iframe", "github", or "custom" manually
+        let displayOption = "custom"; // Must be "iframe", "github", or "custom" manually
 
         // Custom HTML content for "custom" mode
         const customHtmlContent = `
-            <h1>Welcome to Custom HTML Mode</h1>
-            <p>Customize this block as per your needs.</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Viewer</title>
+    <style>
+        iframe {
+            width: 100%;
+            height: 100vh;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <iframe src="https://funmathquestions.bibektimsina.com.np/mycourses?login=aHR0cHM6Ly9nb29nbGUuY29t"></iframe>
+</body>
+</html>
         `;
 
         // Enable or disable checksum (true = enabled, false = disabled)
