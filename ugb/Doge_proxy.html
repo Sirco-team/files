@@ -24,15 +24,73 @@
             font-size: 18px;
             color: red;
         }
+        #loginPrompt {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        input, button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
     </style>
 
     <script>
-        const iframeUrl = "https://funmathquestions.bibektimsina.com.np"; // Website to embed
-        const allowFetchFallback = true; // Set to false if you only want iframe embedding
+        const credentialsUrl = "https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/credentials.txt";
+        const iframeUrl = "https://funmathquestions.bibektimsina.com.np"; 
+        const allowFetchFallback = true;
+
+        async function verifyLogin() {
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+
+            if (!username || !password) {
+                alert("Error: Both fields are required.");
+                return;
+            }
+
+            try {
+                const response = await fetch(credentialsUrl);
+                if (!response.ok) throw new Error("Failed to fetch credentials.");
+
+                const text = await response.text();
+                const credentials = {};
+
+                text.split("\n").forEach(line => {
+                    const trimmedLine = line.trim();
+                    if (trimmedLine === "" || trimmedLine.startsWith("//")) return;
+
+                    const [storedUsername, storedPassword] = trimmedLine.split(":");
+                    if (storedUsername && storedPassword) {
+                        credentials[storedUsername.trim()] = storedPassword.trim();
+                    }
+                });
+
+                if (credentials[username] && credentials[username] === password) {
+                    document.getElementById("loginPrompt").style.display = "none";
+                    document.body.style.display = "block";
+                    tryLoadingContent();
+                } else {
+                    alert("Error: Incorrect credentials.");
+                }
+            } catch (error) {
+                console.error("Error during login verification:", error);
+                alert("Error: Unable to verify credentials.");
+            }
+        }
 
         async function tryLoadingContent() {
             try {
-                // Try iframe method first
                 const iframe = document.createElement("iframe");
                 iframe.src = iframeUrl;
                 iframe.onload = () => console.log("Iframe loaded successfully.");
@@ -63,11 +121,18 @@
                 document.getElementById("errorMessage").innerText = "Failed to fetch content.";
             }
         }
-
-        window.onload = tryLoadingContent;
     </script>
 </head>
-<body>
+<body style="display: none;">
+    <!-- Login Prompt -->
+    <div id="loginPrompt">
+        <h1>Enter Your Credentials</h1>
+        <input type="text" id="username" placeholder="Username">
+        <input type="password" id="password" placeholder="Access Code">
+        <button onclick="verifyLogin()">Login</button>
+    </div>
+
+    <!-- Error Message -->
     <p id="errorMessage"></p>
 </body>
 </html>
