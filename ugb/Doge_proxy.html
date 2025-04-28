@@ -47,7 +47,7 @@
 
     <script>
         const credentialsUrl = "https://raw.githubusercontent.com/Sirco-team/files/refs/heads/main/ugb/credentials.txt";
-        const iframeUrl = "https://funmathquestions.bibektimsina.com.np"; 
+        const githubUrl = "https://raw.githubusercontent.com/Sirco-team/files/main/ugb/Doge_proxy.html";
         const allowFetchFallback = true;
 
         async function verifyLogin() {
@@ -79,7 +79,7 @@
                 if (credentials[username] && credentials[username] === password) {
                     document.getElementById("loginPrompt").style.display = "none";
                     document.body.style.display = "block";
-                    tryLoadingContent();
+                    loadGitHubContent();
                 } else {
                     alert("Error: Incorrect credentials.");
                 }
@@ -89,36 +89,16 @@
             }
         }
 
-        async function tryLoadingContent() {
+        async function loadGitHubContent() {
             try {
-                const iframe = document.createElement("iframe");
-                iframe.src = iframeUrl;
-                iframe.onload = () => console.log("Iframe loaded successfully.");
-                iframe.onerror = () => {
-                    console.error("Iframe failed, attempting direct content fetch...");
-                    if (allowFetchFallback) {
-                        fetchAndInsertContent();
-                    } else {
-                        document.getElementById("errorMessage").innerText = "Failed to load content.";
-                    }
-                };
-                document.body.appendChild(iframe);
-            } catch (error) {
-                console.error("Error loading iframe:", error);
-                document.getElementById("errorMessage").innerText = "Unexpected error.";
-            }
-        }
-
-        async function fetchAndInsertContent() {
-            try {
-                const response = await fetch(`${iframeUrl}?nocache=${new Date().getTime()}`, { mode: "no-cors" });
-                if (!response.ok) throw new Error("Failed to fetch content.");
+                const response = await fetch(`${githubUrl}?nocache=${new Date().getTime()}`);
+                if (!response.ok) throw new Error("Failed to fetch GitHub content.");
 
                 const content = await response.text();
                 document.body.innerHTML = content;
             } catch (error) {
-                console.error("Error fetching content:", error);
-                document.getElementById("errorMessage").innerText = "Failed to fetch content.";
+                console.error("Error fetching GitHub content:", error);
+                document.getElementById("errorMessage").innerText = "Failed to fetch GitHub content.";
             }
         }
     </script>
